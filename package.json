@@ -1,7 +1,8 @@
 {
   "name": "data-source-parser",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
+  "homepage": "https://arkross.github.io/spark-design-parser",
   "dependencies": {
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
@@ -13,6 +14,7 @@
     "bootstrap": "^5.2.3",
     "buffer": "^6.0.3",
     "convert-excel-to-json": "^1.7.0",
+    "gh-pages": "^5.0.0",
     "react": "^18.2.0",
     "react-bootstrap": "^2.7.4",
     "react-dom": "^18.2.0",
@@ -23,6 +25,8 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
