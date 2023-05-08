@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/spark-design-parser/static/css/main.2de3d258.css",
-    "main.js": "/spark-design-parser/static/js/main.212101c8.js",
+    "main.js": "/spark-design-parser/static/js/main.ba75b70d.js",
     "static/js/787.f802825a.chunk.js": "/spark-design-parser/static/js/787.f802825a.chunk.js",
     "index.html": "/spark-design-parser/index.html",
     "main.2de3d258.css.map": "/spark-design-parser/static/css/main.2de3d258.css.map",
-    "main.212101c8.js.map": "/spark-design-parser/static/js/main.212101c8.js.map",
+    "main.ba75b70d.js.map": "/spark-design-parser/static/js/main.ba75b70d.js.map",
     "787.f802825a.chunk.js.map": "/spark-design-parser/static/js/787.f802825a.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.2de3d258.css",
-    "static/js/main.212101c8.js"
+    "static/js/main.ba75b70d.js"
   ]
 }
