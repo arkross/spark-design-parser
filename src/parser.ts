@@ -9,6 +9,27 @@ interface RowItem {
   photoPath: string,
 }
 
+const cleanName = (name: string) => {
+  return name.replace(/[^a-zA-Zà-üÀ-Ü\u4E00-\u9FA5]/gi, '');
+};
+
+const cleanFileName = (fileName: string) => {
+  return fileName
+    .replace(/_/gi, '-')
+    .replace(/\bCOT\b/gi, '')
+    .replace(/[^a-zA-Zà-üÀ-Ü\u4E00-\u9FA5]/gi, '');
+};
+
+const isNameMatching = (name: string, entry: string) => {
+  const cleanedName = cleanName(name);
+  const entryRegex = new RegExp(cleanedName, 'gi');
+  return entryRegex.test(cleanFileName(entry));
+};
+
+const isAgentCodeMatching = (agentCode: string, entry: string) => {
+  return entry.includes(agentCode);
+};
+
 const parseXlsxToAIDataSource = (
   rows: any[],
   basePhotoPath = '',
@@ -41,14 +62,17 @@ const parseXlsxToAIDataSource = (
     let photoPath = '';
     // Scan the photo directory to see if the photo exists, and get the corresponding filename
     if (hasPhoto) {
-      const cleanedName = name.replace(/[^a-zA-Z0-9]/g, '');
-      const entryRegex = new RegExp(cleanedName, 'gi');
-      const photoEntry = directoryEntries.find((entry) => entryRegex.test(entry.replace(/[^a-zA-Z0-9]/g, '')));
-      if (photoEntry) {
-        photoPath = `${basePhotoPath}/${photoEntry}`;
+      let photoEntry = notFoundPlaceholderPath;
+      const photoEntryByName = directoryEntries.find((entry) => isNameMatching(name, entry));
+      if (photoEntryByName) {
+        photoEntry = photoEntryByName;
       } else {
-        photoPath = notFoundPlaceholderPath;
+        const photoEntryByAgentCode = directoryEntries.find((entry) => isAgentCodeMatching(agentCode, entry));
+        if (photoEntryByAgentCode) {
+          photoEntry = photoEntryByAgentCode;
+        }
       }
+      photoPath = `${basePhotoPath}/${photoEntry}`;
     } else {
       photoPath = silhouettePhotoPath;
     }
@@ -64,6 +88,8 @@ const parseXlsxToAIDataSource = (
     } as RowItem;
   });
 
+  // Group by category
+  let positionCounter = 2;
   const groupedByCategory: Map<string, RowItem[]> = jsonData.reduce((acc, curr) => {
     const { category } = curr;
     if (acc.has(category)) {
@@ -71,12 +97,13 @@ const parseXlsxToAIDataSource = (
       if (currCategory) {
         currCategory.push({
           ...curr,
-          position: currCategory.length + 1,
+          position: positionCounter++,
         });
         acc.set(category, currCategory);
       }
     } else {
       acc.set(category, [curr]);
+      positionCounter = 2;
     }
     return acc;
   }, new Map());
@@ -114,9 +141,12 @@ const parseXlsxToAIDataSource = (
     } else if (currentCategoryRowCount >= MAX_ROW_PER_PAGE) {
       const categoryPageCount = Math.ceil(currentCategoryRowCount / MAX_ROW_PER_PAGE);
       for (let currentCategoryPageCounter = 1; currentCategoryPageCounter <= categoryPageCount; currentCategoryPageCounter++) {
-        const start = (currentCategoryPageCounter - 1) * MAX_ROW_PER_PAGE;
-        const end = start + MAX_ROW_PER_PAGE;
+        const start = (currentCategoryPageCounter - 1) * MAX_ITEM_PER_PAGE;
+        const end = start + MAX_ITEM_PER_PAGE;
         const currentPageItems = currentCategory.slice(start, end);
+        currentPageItems.forEach((item) => {
+          item.position = item.position ? item.position - start : 1;
+        });
         paginatedCategory.set(currentPage, currentPageItems);
         currentPage++;
       }
