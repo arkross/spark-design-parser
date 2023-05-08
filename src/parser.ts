@@ -62,7 +62,7 @@ const parseXlsxToAIDataSource = (
     let photoPath = '';
     // Scan the photo directory to see if the photo exists, and get the corresponding filename
     if (hasPhoto) {
-      let photoEntry = notFoundPlaceholderPath;
+      let photoEntry = '';
       const photoEntryByName = directoryEntries.find((entry) => isNameMatching(name, entry));
       if (photoEntryByName) {
         photoEntry = photoEntryByName;
@@ -72,7 +72,11 @@ const parseXlsxToAIDataSource = (
           photoEntry = photoEntryByAgentCode;
         }
       }
-      photoPath = `${basePhotoPath}/${photoEntry}`;
+      if (!photoEntry) {
+        photoPath = notFoundPlaceholderPath;
+      } else {
+        photoPath = `${basePhotoPath}/${photoEntry}`;
+      }
     } else {
       photoPath = silhouettePhotoPath;
     }
