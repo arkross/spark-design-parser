@@ -90,23 +90,36 @@ const parseXlsxToAIDataSource = (
     const nextCategoryName = categories[categoryCounter];
     const currentCategory = groupedByCategory.get(currentCategoryName);
     const nextCategory = groupedByCategory.get(nextCategoryName);
-    if (!currentCategory || !nextCategory) {
+    if (!currentCategory) {
       continue;
     }
 
     const currentCategoryLength = currentCategory.length || 0;
-    const nextCategoryLength = nextCategory.length || 0;
+    const nextCategoryLength = nextCategory?.length || 0;
     const currentCategoryRowCount = Math.ceil(currentCategoryLength / MAX_ITEM_PER_ROW);
     const nextCategoryRowCount = Math.ceil(nextCategoryLength / MAX_ITEM_PER_ROW);
 
     // If the current and the next total row count does not exceed max row per page, combine them into one page
     if (currentCategoryRowCount + nextCategoryRowCount <= MAX_ROW_PER_PAGE) {
       const nextCategoryPositionShiftCount = currentCategoryRowCount * MAX_ITEM_PER_ROW;
-      nextCategory.forEach((item) => {
-        item.position = item.position ? item.position + nextCategoryPositionShiftCount : 0;
-      });
-      paginatedCategory.set(currentPage, [...currentCategory, ...nextCategory]);
-      categoryCounter++;
+      if (nextCategory) {
+        nextCategory.forEach((item) => {
+          item.position = item.position ? item.position + nextCategoryPositionShiftCount : 0;
+        });
+        paginatedCategory.set(currentPage, [...currentCategory, ...nextCategory]);
+        categoryCounter++;
+      } else {
+        paginatedCategory.set(currentPage, currentCategory);
+      }
+    } else if (currentCategoryRowCount >= MAX_ROW_PER_PAGE) {
+      const categoryPageCount = Math.ceil(currentCategoryRowCount / MAX_ROW_PER_PAGE);
+      for (let currentCategoryPageCounter = 1; currentCategoryPageCounter <= categoryPageCount; currentCategoryPageCounter++) {
+        const start = (currentCategoryPageCounter - 1) * MAX_ROW_PER_PAGE;
+        const end = start + MAX_ROW_PER_PAGE;
+        const currentPageItems = currentCategory.slice(start, end);
+        paginatedCategory.set(currentPage, currentPageItems);
+        currentPage++;
+      }
     } else {
       paginatedCategory.set(currentPage, currentCategory);
     }
